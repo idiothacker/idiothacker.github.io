@@ -33,3 +33,5 @@ gem "webrick"
 gem 'jekyll-seo-tag'
 
 gem "minimal-mistakes-jekyll"
+
+gem 'jekyll-sitemap'
