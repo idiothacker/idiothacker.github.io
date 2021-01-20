@@ -93,9 +93,9 @@ analytics:
 
 # Site Author
 author:
-  name             : "Eric Bays"
+  name             : "Eric Bays, OSCP"
   avatar           : "/assets/images/avatar.jpg"
-  bio              : "Information security enthusiast and ethical hacker. CTF Player. Disc Golfer."
+  bio              : "Information security enthusiast. Ethical hacker. CTF player. Disc golfer."
   location         : "United States"
   email            : "eric@idiothacker.com"
   links:
