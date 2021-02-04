@@ -5,7 +5,7 @@ excerpt: "Buff is an easy rated Windows machine from HackTheBox. After our scan,
 #date: 2021-01-15
 classes: wide
 header:
-  teaser: /assets/images/htb-buff/buff_logo.jpg
+  teaser: /assets/images/htb-buff/buff_logo.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -19,7 +19,7 @@ tags:
   - Chisel
 ---
 
-![](/assets/images/htb-buff/buff_logo.jpg)
+![](/assets/images/htb-buff/buff_logo.png)
 
 ## Summary
 Buff is an easy rated Windows machine from HackTheBox. After our scan, we find that there is a Gym Management System 1.0 deployment running on port 8080. We find some documentation around a known vulnerability in this tool that allows for unauthenticated remote code execution. We are then able to use this exploit to gain a foothold. After some enumeration of the system, we find that an application called CloudMe is running internally on port 8888, and naturally given the name we find that this is vulnerable to a buffer overflow that we will exploit to get system administrator access.

@@ -5,7 +5,7 @@ excerpt: "Omni is an easy rated machine running Windows IoT Core. We will identi
 date: 2021-01-14
 classes: wide
 header:
-  teaser: /assets/images/htb-omni/omni_logo.jpg
+  teaser: /assets/images/htb-omni/omni_logo.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -20,7 +20,7 @@ tags:
   - secretsdump.py
 ---
 
-![](/assets/images/htb-omni/omni_logo.jpg)
+![](/assets/images/htb-omni/omni_logo.png)
 
 ## Summary
 Omni is an easy rated machine running Windows IoT Core. We will identify the OS after our scan by finding a Windows Device Portal installation found on port 8080. After doing some quick Googling for vulnerabilities on this operating system, we find that the OS has a vulnerable service named Sirep Test Service that allows for remote code execution. We will use this vulnerability to export system account hashes. We then crack these hashes, and use them to login to the Windows Device Portal where we will be able to spawn a reverse shell. Enumeration of the file system leads to a series of juicy information in a PowerShell Secure String format. We will then need to decrypt PowerShell secure strings, resulting in having credentials and flags to both the user and administrator accounts.

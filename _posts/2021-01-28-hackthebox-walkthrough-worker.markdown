@@ -5,7 +5,7 @@ excerpt: "Worker is a medium rated difficulty machine from Hack the Box. This ma
 #date: 2021-01-23
 classes: wide
 header:
-  teaser: /assets/images/htb-worker/worker_logo.jpg
+  teaser: /assets/images/htb-worker/worker_logo.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -18,7 +18,7 @@ tags:
   - Azure DevOps
 ---
 
-![](/assets/images/htb-worker/worker_logo.jpg)
+![](/assets/images/htb-worker/worker_logo.png)
 
 ## Summary
 Worker is a medium rated difficulty machine from [Hack the Box](https://hackthebox.eu). This machine will test our ability to properly enumerate a system. Our initial scan will show us that a subversion repository (SVN) service is running on port 3690. Enumeration of this leads to us finding multiple subdomains of worker.htb, one of them being a deployment of Azure DevOps. In Azure DevOps we are able to use built in functionality that allows for us to upload an ASPX web shell to one of the site directories, resulting in command execution. We then turn this into a stable reverse shell and enumeration leads to more credentials that to an account that has access to Azure DevOps pipelines. We then use this functionality to spawn a reverse shell as the system user.

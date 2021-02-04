@@ -5,7 +5,7 @@ excerpt: "Compromised is a Hard rated Linux machine from Hack the Box. This mach
 #date: 2021-01-15
 classes: wide
 header:
-  teaser: /assets/images/htb-compromised/compromised_logo.jpg
+  teaser: /assets/images/htb-compromised/compromised_logo.png
   teaser_home_page: true
   icon: /assets/images/hackthebox.webp
 categories:
@@ -24,7 +24,7 @@ tags:
   - PAM Backdoor
 ---
 
-![](/assets/images/htb-compromised/compromised_logo.jpg)
+![](/assets/images/htb-compromised/compromised_logo.png)
 
 ## Summary
 Compromised is a Hard rated Linux machine from [Hack the Box](https://hackthebox.eu). This machine was created to run like an already compromised machine. We will be challenged to thoroughly enumerate the system, looking for clues of how the previous attacker compromised the machine, and reusing the attackers work along the way. We first find a backup of the website files. This leads to the LiteCart admin and database credentials. We then take advantage of an arbitrary file upload vulneravility to upload a MySQL web shell. This leads to us finding the attackers user defined function that helps us get our initial shell. We then enumerate to find credentials that allow us to ssh as the first user. Through more enumeration we find that the attacker created a PAM backdoor that we decompile to find a working root password."
