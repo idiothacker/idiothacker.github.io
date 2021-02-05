@@ -11,7 +11,6 @@ header:
 categories:
   - Hack the Box
   - Linux
-  - CTF
 tags:  
   - Hack the Box
   - Linux
