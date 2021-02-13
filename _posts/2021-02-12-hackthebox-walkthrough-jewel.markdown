@@ -1,7 +1,7 @@
 ---
 layout: single
 title: Jewel Walkthrough - Hack The Box
-excerpt: "Jewel is a Medium difficulty rated machine at HackTheBox. This machine will challenge your enumeration skills. It will start with finding a Git repository that is browsable over http on port 8000. We also find that there is a Blog hosted on port 8080. We are able to confirm that the files in the Git repo are the same used for the blog. This leads to us fingerprinting the Ruby on Rails version that is running the Blog site. We are able to find that this version of Rails has an insecure data deserialization vulnerability that leads to our foothold. The enumeration we are able to find the password as well as the secret to the two-factor authentication that is enable on the foothold account. This leads t us being able to sudo the gem binary to get a shell as the root user."
+excerpt: "Jewel is a Medium difficulty rated machine at HackTheBox. This machine will challenge your enumeration skills. It will start with finding a Git repository that is browsable over http on port 8000. We also find that there is a Blog hosted on port 8080. We are able to confirm that the files in the Git repo are the same used for the blog. This leads to us fingerprinting the Ruby on Rails version that is running the Blog site. We are able to find that this version of Rails has an insecure data deserialization vulnerability that leads to our foothold. Through enumeration we are able to find the password as well as the secret to the two-factor authentication that is enabled on the foothold account. This leads to us being able to sudo the gem binary to get a shell as the root user."
 classes: wide
 header:
   teaser: /assets/images/htb-jewel/jewel_logo.png
@@ -23,7 +23,7 @@ tags:
 ![](/assets/images/htb-jewel/jewel_logo.png)
 
 ## Summary
-Jewel is a Medium difficulty rated machine at [HackTheBox](https://hackthebox.eu). This machine will challenge your enumeration skills. It will start with finding a Git repository that is browsable over http on port 8000. We also find that there is a Blog hosted on port 8080. We are able to confirm that the files in the Git repo are the same used for the blog. This leads to us fingerprinting the Ruby on Rails version that is running the Blog site. We are able to find that this version of Rails has an insecure data deserialization vulnerability that leads to our foothold. The enumeration we are able to find the password as well as the secret to the two-factor authentication that is enable on the foothold account. This leads t us being able to sudo the gem binary to get a shell as the root user. 
+Jewel is a Medium difficulty rated machine at [HackTheBox](https://hackthebox.eu). This machine will challenge your enumeration skills. It will start with finding a Git repository that is browsable over http on port 8000. We also find that there is a Blog hosted on port 8080. We are able to confirm that the files in the Git repo are the same used for the blog. This leads to us fingerprinting the Ruby on Rails version that is running the Blog site. We are able to find that this version of Rails has an insecure data deserialization vulnerability that leads to our foothold. Through enumeration we are able to find the password as well as the secret to the two-factor authentication that is enabled on the foothold account. This leads to us being able to sudo the gem binary to get a shell as the root user. 
 
 ## Port Scan
 We'll start by scanning for open TCP ports using the following nmap command.
