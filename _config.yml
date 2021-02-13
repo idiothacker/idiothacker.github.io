@@ -108,15 +108,15 @@ author:
     - label: "Twitter"
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/IdiotHackerEB"
-    - label: "Facebook"
-      icon: "fab fa-fw fa-facebook-square"
-      # url: "https://facebook.com/"
+    - label: "LinkedIn"
+      icon: "fab fa-fw fa-linkedin"
+      url: "https://www.linkedin.com/in/esbays/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/idiothacker"
-    - label: "Instagram"
-      icon: "fab fa-fw fa-instagram"
-      # url: "https://instagram.com/"
+    - label: "HackTheBox"
+      icon: "fa fa-fw fa-cube"
+      url: "https://www.hackthebox.eu/home/users/profile/271618"
 
 # Site Footer
 footer:
