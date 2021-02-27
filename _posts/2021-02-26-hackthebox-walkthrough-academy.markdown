@@ -335,7 +335,7 @@ While that is running, we can begin looking through the log files in `/var/log` 
 
 When we list the contents of `/var/log`, we get a list of the logs on the machine. Notice that the `adm` group has access to many of these. It is because we are in this group that we will be able to look through these. Initial targets should be things like the `auth.log`, the logs in `/var/log/mysql` and logs in `/var/log/audit`.
 
-The audit logs for example will track the us of commands, and data that is passed with them.
+The audit logs for example will track the use of commands, and if enabled, it will track TTY input. For example, the password that is entered after a password prompt. If the audit log is configured to track this, it will store it as a hexadecimal value as part of the `data` value.
 
 **Example:**
 ```
